@@ -67,7 +67,7 @@ function twig_localized_date_filter(Twig_Environment $env, $date, $dateFormat = 
     return $formatter->format($date->getTimestamp());
 }
 
-function twig_localized_number_filter($number, $style = 'decimal', $type = 'default', $locale = null)
+function twig_localized_number_filter($number, $fractionDigits = 2, $style = 'decimal', $type = 'default', $locale = null)
 {
     static $typeValues = array(
         'default' => NumberFormatter::TYPE_DEFAULT,
@@ -77,16 +77,16 @@ function twig_localized_number_filter($number, $style = 'decimal', $type = 'defa
         'currency' => NumberFormatter::TYPE_CURRENCY,
     );
 
-    $formatter = twig_get_number_formatter($locale, $style);
+    $formatter = twig_get_number_formatter($locale, $style, $fractionDigits);
 
     if (!isset($typeValues[$type])) {
         throw new Twig_Error_Syntax(sprintf('The type "%s" does not exist. Known types are: "%s"', $type, implode('", "', array_keys($typeValues))));
     }
 
-    return $formatter->format($number, $typeValues[$type]);
+    return $formatter->format($number, $typeValues[$type], $fractionDigits);
 }
 
-function twig_localized_currency_filter($number, $currency = null, $locale = null)
+function twig_localized_currency_filter($number, $fractionDigits = 2, $currency = null, $locale = null)
 {
     $formatter = twig_get_number_formatter($locale, 'currency');
 
@@ -101,7 +101,7 @@ function twig_localized_currency_filter($number, $currency = null, $locale = nul
  *
  * @return NumberFormatter A NumberFormatter instance
  */
-function twig_get_number_formatter($locale, $style)
+function twig_get_number_formatter($locale, $style, $fractionDigits = null)
 {
     static $formatter, $currentStyle;
 
@@ -130,6 +130,10 @@ function twig_get_number_formatter($locale, $style)
     $currentStyle = $style;
 
     $formatter = NumberFormatter::create($locale, $styleValues[$style]);
+
+    if ($fractionDigits) {
+        $formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $fractionDigits);
+    }
 
     return $formatter;
 }
