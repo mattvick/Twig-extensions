@@ -67,7 +67,7 @@ function twig_localized_date_filter(Twig_Environment $env, $date, $dateFormat = 
     return $formatter->format($date->getTimestamp());
 }
 
-function twig_localized_number_filter($number, $fractionDigits = 2, $style = 'decimal', $type = 'default', $locale = null)
+function twig_localized_number_filter($number, $style = 'decimal', $type = 'default', $fractionDigits = null, $locale = null)
 {
     static $typeValues = array(
         'default' => NumberFormatter::TYPE_DEFAULT,
@@ -86,7 +86,7 @@ function twig_localized_number_filter($number, $fractionDigits = 2, $style = 'de
     return $formatter->format($number, $typeValues[$type], $fractionDigits);
 }
 
-function twig_localized_currency_filter($number, $fractionDigits = 2, $currency = null, $locale = null)
+function twig_localized_currency_filter($number, $currency = null, $fractionDigits = null, $locale = null)
 {
     $formatter = twig_get_number_formatter($locale, 'currency');
 
