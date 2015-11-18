@@ -83,12 +83,12 @@ function twig_localized_number_filter($number, $style = 'decimal', $type = 'defa
         throw new Twig_Error_Syntax(sprintf('The type "%s" does not exist. Known types are: "%s"', $type, implode('", "', array_keys($typeValues))));
     }
 
-    return $formatter->format($number, $typeValues[$type], $fractionDigits);
+    return $formatter->format($number, $typeValues[$type]);
 }
 
 function twig_localized_currency_filter($number, $currency = null, $fractionDigits = null, $locale = null)
 {
-    $formatter = twig_get_number_formatter($locale, 'currency');
+    $formatter = twig_get_number_formatter($locale, 'currency', $fractionDigits, $currency);
 
     return $formatter->formatCurrency($number, $currency);
 }
@@ -101,7 +101,7 @@ function twig_localized_currency_filter($number, $currency = null, $fractionDigi
  *
  * @return NumberFormatter A NumberFormatter instance
  */
-function twig_get_number_formatter($locale, $style, $fractionDigits = null)
+function twig_get_number_formatter($locale, $style, $fractionDigits = null, $currency = null)
 {
     static $formatter, $currentStyle;
 
@@ -131,8 +131,14 @@ function twig_get_number_formatter($locale, $style, $fractionDigits = null)
 
     $formatter = NumberFormatter::create($locale, $styleValues[$style]);
 
-    if ($fractionDigits) {
-        $formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $fractionDigits);
+    // this must be set when setting the fraction digits for a currency
+    // http://php.net/manual/en/numberformatter.formatcurrency.php#114376
+    if (!is_null($currency)) {
+        $formatter->setTextAttribute(NumberFormatter::CURRENCY_CODE, $currency);
+    }
+
+    if (!is_null($fractionDigits)) {
+        $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, $fractionDigits);
     }
 
     return $formatter;
